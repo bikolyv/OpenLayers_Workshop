@@ -3,7 +3,7 @@ import {Map, View} from 'ol';
 import GeoJSON from 'ol/format/GeoJSON';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
-import {Link, DragAndDrop, Modify}  from 'ol/interaction';
+import {Link, DragAndDrop, Modify, Draw}  from 'ol/interaction';
 
 const source = new VectorSource();
 const layer = new VectorLayer({
@@ -26,6 +26,12 @@ map.addInteraction(
 );
 map.addInteraction(
   new Modify({
+    source: source,
+  })
+);
+map.addInteraction(
+  new Draw({
+    type: 'Polygon',
     source: source,
   })
 );
