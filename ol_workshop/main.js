@@ -3,7 +3,7 @@ import {Map, View} from 'ol';
 import GeoJSON from 'ol/format/GeoJSON';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
-import {Link, DragAndDrop}  from 'ol/interaction';
+import {Link, DragAndDrop, Modify}  from 'ol/interaction';
 
 const source = new VectorSource();
 const layer = new VectorLayer({
@@ -22,6 +22,11 @@ map.addInteraction(
   new DragAndDrop({
     source: source,
     formatConstructors: [GeoJSON],
+  })
+);
+map.addInteraction(
+  new Modify({
+    source: source,
   })
 );
 map.addInteraction(new Link());
