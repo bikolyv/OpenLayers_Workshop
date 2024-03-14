@@ -6,32 +6,43 @@ import VectorSource from 'ol/source/Vector';
 import {Link, DragAndDrop, Modify, Draw, Snap}  from 'ol/interaction';
 import {Style, Fill, Stroke} from 'ol/style';
 
+import colormap from 'colormap';
+import { getArea } from 'ol/sphere';
+
+const steps = 50;
+const ramp = colormap({
+  colormap: 'blackbody',
+  nshades: steps,
+});
+
+const min = 1e8;
+const max = 2e13;
+function clamp(value, low, high) {
+  return Math.max(low, Math.min(value, high));
+}
+
+function getColor(feature) {
+  const area = getArea(feature.getGeometry());
+  const f = Math.pow(clamp((area - min) / (max - min), 0, 1), 1/2);
+  const index  = Math.round(f * (steps - 1));
+  return ramp[index];
+}
+
+
 const source = new VectorSource();
-
-const style1 = new Style({
-  fill: new Fill({
-    color: 'red',
-  }),
-  stroke: new Stroke({
-    color: 'white',
-  }),
-});
-
-const style2 = new Style({
-  fill: new Fill({
-    color: 'blue',
-  }),
-  stroke: new Stroke({
-    color: 'black',
-  }),
-});
 
 const layer = new VectorLayer({
   source: source,
-  style: function (feature, resolution) {
-    const name = feature.get('name').toUpperCase();
-    return name < 'N' ? style1 : style2;
-  }
+  style: function(feature) {
+    return new Style({
+      fill: new Fill({
+        color: getColor(feature),
+      }),
+      stroke: new Stroke({
+        color: 'rgba(255,255,255,0.8)',
+      }),
+    });
+  },
 });
 
 const map = new Map({
