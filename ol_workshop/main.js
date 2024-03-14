@@ -8,16 +8,30 @@ import {Style, Fill, Stroke} from 'ol/style';
 
 const source = new VectorSource();
 
+const style1 = new Style({
+  fill: new Fill({
+    color: 'red',
+  }),
+  stroke: new Stroke({
+    color: 'white',
+  }),
+});
+
+const style2 = new Style({
+  fill: new Fill({
+    color: 'blue',
+  }),
+  stroke: new Stroke({
+    color: 'black',
+  }),
+});
+
 const layer = new VectorLayer({
   source: source,
-  style: new Style({
-    fill: new Fill({
-      color: 'red',
-    }),
-    stroke: new Stroke({
-      color: 'white',
-    }),
-  }),
+  style: function (feature, resolution) {
+    const name = feature.get('name').toUpperCase();
+    return name < 'N' ? style1 : style2;
+  }
 });
 
 const map = new Map({
