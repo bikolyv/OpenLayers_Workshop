@@ -4,11 +4,22 @@ import GeoJSON from 'ol/format/GeoJSON';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import {Link, DragAndDrop, Modify, Draw, Snap}  from 'ol/interaction';
+import {Style, Fill, Stroke} from 'ol/style';
 
 const source = new VectorSource();
+
 const layer = new VectorLayer({
   source: source,
+  style: new Style({
+    fill: new Fill({
+      color: 'red',
+    }),
+    stroke: new Stroke({
+      color: 'white',
+    }),
+  }),
 });
+
 const map = new Map({
   target: 'map-container',
   view: new View({
