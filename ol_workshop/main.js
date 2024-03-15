@@ -9,7 +9,7 @@ import TileLayer from 'ol/layer/Tile';
 import {fromLonLat} from 'ol/proj';
 
 import {Link, DragAndDrop, Modify, Draw, Snap}  from 'ol/interaction';
-import {Style, Fill, Stroke} from 'ol/style';
+import {Style, Fill, Stroke, Icon} from 'ol/style';
 
 import colormap from 'colormap';
 import { getArea } from 'ol/sphere';
@@ -18,6 +18,7 @@ import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
 import { circular } from 'ol/geom/Polygon';
 import Control from 'ol/control/Control';
+import kompas from 'kompas';
 
 const map = new Map({
   target: 'map-container',
@@ -37,6 +38,63 @@ const source = new VectorSource();
 const layer = new VectorLayer({
   source: source,
 });
+
+navigator.geolocation.watchPosition(
+  function(pos) {
+    const coords = [pos.coords.longitude, pos.coords.latitude];
+    const accuracy = circular(coords, pos.coords.accuracy);
+    source.clear(true);
+    source.addFeatures([
+      new Feature(
+        accuracy.transform('EPSG:4326', map.getView().getProjection())
+      ),
+      new Feature(new Point(fromLonLat(coords))),
+    ]);
+  },
+  function(error) {
+    alert('ERROR: ${error.message}');
+  },
+  {
+    enableHighAccuracy: true,
+  }
+)
+
+const style = new Style({
+  fill: new Fill({
+    color: 'rgba(0, 0, 255, 0.2)',
+  }),
+  image: new Icon({
+    src: './data/location-heading.svg',
+    imgSize: [27, 55],
+    rotateWithView: true,
+  }),
+});
+layer.setStyle(style);
+
+function startCompass() {
+  kompas()
+    .watch()
+    .on('heading', function(heading) {
+      style.getImage().setRotation((Math.PI / 180) * heading);
+    });
+}
+
+if(
+  window.DeviceOrientationEvent &&
+  typeof DeviceOrientationEvent.requestPermission == 'function'
+) {
+  locate.addEventListener('click', function() {
+    DeviceOrientationEvent.requestPermission()
+      .then(startCompass)
+      .catch(function(error) {
+        alert('ERROR: ${error.message}');
+      });
+  });
+} else if ('ondeviceorientationabsolute' in window) {
+  startCompass();
+} else {
+  alert('No device orientation provided by device');
+}
 
 map.addLayer(layer);
 map.addInteraction(
@@ -63,25 +121,7 @@ map.addInteraction(
 );
 map.addInteraction(new Link());
 
-navigator.geolocation.watchPosition(
-  function(pos) {
-    const coords = [pos.coords.longitude, pos.coords.latitude];
-    const accuracy = circular(coords, pos.coords.accuracy);
-    source.clear(true);
-    source.addFeatures([
-      new Feature(
-        accuracy.transform('EPSG:4326', map.getView().getProjection())
-      ),
-      new Feature(new Point(fromLonLat(coords))),
-    ]);
-  },
-  function(error) {
-    alert('ERROR: ${error.message}');
-  },
-  {
-    enableHighAccuracy: true,
-  }
-)
+
 
 const locate = document.createElement('div');
 locate.className = 'ol-control ol-unselectable locate';
