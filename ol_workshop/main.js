@@ -3,6 +3,11 @@ import VectorTileLayer from 'ol/layer/VectorTile';
 import VectorTileSource from 'ol/source/VectorTile';
 import {Map, View} from 'ol';
 import {fromLonLat} from 'ol/proj';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
+import {Stroke, Style} from 'ol/style';
+import Feature from 'ol/Feature';
+import {fromExtent} from 'ol/geom/Polygon';
 
 const map = new Map({
   target: 'map-container',
@@ -22,3 +27,29 @@ const layer = new VectorTileLayer({
   }),
 });
 map.addLayer(layer);
+
+const source = new VectorSource();
+new VectorLayer({
+  map: map,
+  source: source,
+  style: new Style({
+    stroke: new Stroke({
+      color: 'red',
+      width: 4,
+    }),
+  }),
+});
+
+map.on('pointermove', function (event) {
+  source.clear();
+  map.forEachFeatureAtPixel(
+    event.pixel,
+    function (feature) {
+      const geometry = feature.getGeometry();
+      source.addFeature(new Feature(fromExtent(geometry.getExtent())));
+    },
+    {
+      hitTolerance: 2,
+    }
+  );
+});
