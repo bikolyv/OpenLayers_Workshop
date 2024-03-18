@@ -5,6 +5,7 @@ import VectorLayer from 'ol/layer/Vector';
 import {Map, View} from 'ol';
 import {Stamen, Vector as VectorSource} from 'ol/source';
 import {fromLonLat} from 'ol/proj';
+import WebGLPointsLayer from 'ol/layer/WebGLPoints';
 
 const source = new VectorSource();
 
@@ -39,9 +40,22 @@ client.onload = function () {
 };
 client.send();
 
-const meteorites = new VectorLayer({
+const meteorites = new WebGLPointsLayer({
   source: source,
+  style: {
+    symbol: {
+      symbolType: 'circle',
+      size: [
+        '+',
+        ['*', ['clamp', ['*', ['get', 'mass'], 1 / 20000], 0, 1], 18],
+        8,
+      ],      
+      color: 'rgb(255, 0, 0)',
+      opacity: 0.5,
+    },
+  },
 });
+
 
 new Map({
   target: 'map-container',
